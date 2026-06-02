@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Prodify - Social Productivity Challenge{% endblock %}
+{% block content %}
+<div class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">✨ Social Productivity</div>
+        <h1 class="hero-title">Stay Productive <span class="gradient-text">Together</span></h1>
+        <p class="hero-subtitle">
+            Turn your goals into friendly competitions. Challenge friends, track progress,
+            and build habits that stick — all while having fun.
+        </p>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="hero-stat-number">Create</span>
+                <span class="hero-stat-label">Challenges</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-number">Compete</span>
+                <span class="hero-stat-label">With Friends</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-number">Earn</span>
+                <span class="hero-stat-label">Points & Streaks</span>
+            </div>
+        </div>
+        <div class="hero-actions">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-rocket"></i> Get Started Free
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </a>
+        </div>
+    </div>
+    <div class="hero-illustration">
+        <div class="floating-card card-1">
+            <i class="fas fa-tasks"></i>
+            <span>Daily Goals</span>
+        </div>
+        <div class="floating-card card-2">
+            <i class="fas fa-fire"></i>
+            <span>12 Day Streak!</span>
+        </div>
+        <div class="floating-card card-3">
+            <i class="fas fa-trophy"></i>
+            <span>#1 Leaderboard</span>
+        </div>
+    </div>
+</div>
+
+<div class="features-section">
+    <h2 class="section-title">How It Works</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-flag-checkered"></i></div>
+            <h3>Create a Challenge</h3>
+            <p>Set a productivity goal — study, code, read, or anything you want to improve.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-user-friends"></i></div>
+            <h3>Invite Friends</h3>
+            <p>Share the challenge with friends and compete to see who stays consistent.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+            <h3>Daily Check-ins</h3>
+            <p>Mark your progress daily. Build streaks and earn points for every check-in.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+            <h3>Track Leaderboard</h3>
+            <p>See who's winning. Friendly competition keeps everyone motivated.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

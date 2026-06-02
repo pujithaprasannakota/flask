@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Create Challenge - Prodify{% endblock %}
+{% block content %}
+<div class="form-page">
+    <div class="form-card form-card-wide">
+        <div class="auth-header">
+            <i class="fas fa-flag-checkered auth-icon"></i>
+            <h2>Create a Challenge</h2>
+            <p>Set a goal and invite friends to join</p>
+        </div>
+        <form method="POST" class="auth-form">
+            <div class="form-group">
+                <label for="title"><i class="fas fa-heading"></i> Challenge Title</label>
+                <input type="text" id="title" name="title" placeholder="e.g., 30 Days of Coding" required>
+            </div>
+            <div class="form-group">
+                <label for="description"><i class="fas fa-align-left"></i> Description</label>
+                <textarea id="description" name="description" rows="3" placeholder="Describe your challenge..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="category"><i class="fas fa-tag"></i> Category</label>
+                    <select id="category" name="category">
+                        {% for cat in categories %}
+                        <option value="{{ cat }}">{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="duration_days"><i class="fas fa-calendar-alt"></i> Duration (days)</label>
+                    <input type="number" id="duration_days" name="duration_days" value="7" min="1" max="365">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">
+                <i class="fas fa-rocket"></i> Launch Challenge
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

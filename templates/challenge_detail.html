@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block title %}{{ challenge.title }} - Prodify{% endblock %}
+{% block content %}
+<div class="challenge-detail">
+    <div class="detail-header">
+        <a href="{{ url_for('dashboard') }}" class="back-link"><i class="fas fa-arrow-left"></i> Back</a>
+        <div class="detail-meta-top">
+            <span class="category-badge">{{ challenge.category }}</span>
+            <span class="duration-badge"><i class="fas fa-calendar-alt"></i> {{ challenge.duration_days }} days</span>
+            <span class="participants-badge"><i class="fas fa-users"></i> {{ challenge.participants_count or 0 }} participants</span>
+        </div>
+        <h1>{{ challenge.title }}</h1>
+        {% if challenge.description %}
+        <p class="detail-description">{{ challenge.description }}</p>
+        {% endif %}
+        <div class="detail-creator">
+            <i class="fas fa-user-circle"></i> Created by <strong>{{ challenge.creator_name }}</strong>
+            <span class="dot">•</span>
+            <span>{{ challenge.created_at.strftime('%b %d, %Y') }}</span>
+        </div>
+    </div>
+
+    {% if not is_participant %}
+    <div class="join-section">
+        <a href="{{ url_for('join_challenge', challenge_id=challenge._id) }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-handshake"></i> Join This Challenge
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="action-bar">
+        <div class="invite-section">
+            <button class="btn btn-outline" onclick="document.getElementById('inviteModal').classList.toggle('show')">
+                <i class="fas fa-user-plus"></i> Invite Friends
+            </button>
+            <div id="inviteModal" class="invite-modal">
+                <div class="invite-modal-content">
+                    <div class="invite-modal-header">
+                        <h3><i class="fas fa-user-friends"></i> Invite Friends</h3>
+                        <button class="btn btn-sm" onclick="document.getElementById('inviteModal').classList.remove('show')">&times;</button>
+                    </div>
+                    <div class="invite-modal-body">
+                        {% if not is_participant %}
+                        <p class="empty-invite">Join the challenge first to invite friends!</p>
+                        {% else %}
+                            <div class="invite-section-group">
+                                <h4><i class="fas fa-users"></i> Current Participants ({{ participants|length }})</h4>
+                                <div class="current-participants-list">
+                                    {% for p in participants %}
+                                    <span class="participant-tag"><i class="fas fa-user-circle"></i> {{ p.username }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="invite-section-group">
+                                <h4><i class="fas fa-user-plus"></i> Invite People</h4>
+                                <div class="share-link-box">
+                                    <input type="text" readonly value="{{ url_for('challenge_detail', challenge_id=challenge._id, _external=True) }}">
+                                    <button onclick="navigator.clipboard.writeText(this.previousElementSibling.value); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy', 2000)">Copy</button>
+                                </div>
+                                <form method="POST" action="{{ url_for('invite_by_username', challenge_id=challenge._id) }}" class="invite-by-username-form">
+                                    <input type="text" name="username" placeholder="Enter exact username..." required>
+                                    <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Add</button>
+                                </form>
+                                <input type="text" id="userSearch" placeholder="Search users..." class="user-search-input" oninput="filterUsers(this.value)">
+                                <div id="inviteUserList">
+                                {% if invite_candidates %}
+                                    {% for u in invite_candidates %}
+                                    <div class="invite-user-row" data-username="{{ u.username|lower }}">
+                                        <span><i class="fas fa-user-circle"></i> {{ u.username }}</span>
+                                        <a href="{{ url_for('invite_user', challenge_id=challenge._id, user_id=u._id) }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-plus"></i> Invite
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="empty-invite">No users to invite</p>
+                                {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-bar-right">
+            {% if is_owner %}
+            <a href="{{ url_for('delete_challenge', challenge_id=challenge._id) }}" class="btn btn-danger" onclick="return confirm('Delete this challenge and all its data? This cannot be undone!')">
+                <i class="fas fa-trash"></i> Delete
+            </a>
+            {% endif %}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    {% if is_participant %}
+    <div class="checkin-section">
+        <div class="checkin-card">
+            <div class="checkin-status">
+                {% if user_today_done %}
+                <div class="status-done">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Work logged! {{ user_today_hours }}h today</span>
+                </div>
+                {% else %}
+                <div class="status-pending">
+                    <i class="fas fa-clock"></i>
+                    <span>Not checked in today yet</span>
+                </div>
+                {% endif %}
+            </div>
+            <form method="POST" action="{{ url_for('log_progress', challenge_id=challenge._id) }}" class="checkin-form" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="checkin">
+                <div class="checkin-fields">
+                    <div class="hours-input-group">
+                        <input type="number" name="hours" id="hours" placeholder="Hours" min="0.5" max="24" step="0.5" value="1" required {{ 'disabled' if user_today_done }}>
+                        <label for="hours">hrs</label>
+                    </div>
+                    <div class="proof-input-group">
+                        <textarea name="proof" id="proof" placeholder="What did you accomplish today?" rows="2" required {{ 'disabled' if user_today_done }}>{{ user_today_proof }}</textarea>
+                    </div>
+                    <div class="proof-input-group">
+                        <div class="file-input-wrapper">
+                            <label for="proof_image" class="file-input-label"><i class="fas fa-camera"></i> Upload Photo Proof</label>
+                            <input type="file" name="proof_image" id="proof_image" accept="image/png,image/jpg,image/jpeg,image/gif,image/webp" {{ 'disabled' if user_today_done }}>
+                        </div>
+                        {% if user_today_image %}
+                        <div class="uploaded-preview">
+                            <img src="{{ url_for('static', filename='uploads/' + user_today_image) }}" alt="Today's proof">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="checkin-actions-row">
+                    <button type="submit" class="btn btn-success" {{ 'disabled' if user_today_done }}>
+                        <i class="fas fa-check"></i> Log Work
+                    </button>
+                    {% if user_today_done %}
+                    <form method="POST" action="{{ url_for('log_progress', challenge_id=challenge._id) }}" style="display:inline">
+                        <input type="hidden" name="action" value="undo">
+                        <button type="submit" class="btn btn-outline btn-sm">
+                            <i class="fas fa-undo"></i> Undo
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="leaderboard-section">
+        <h2><i class="fas fa-trophy"></i> Leaderboard (sorted by total hours)</h2>
+        {% if leaderboard %}
+        <div class="leaderboard-table">
+            <div class="lb-header">
+                <span class="lb-rank">#</span>
+                <span class="lb-name">Participant</span>
+                <span class="lb-hours"><i class="fas fa-clock"></i> Total Hrs</span>
+                <span class="lb-streak"><i class="fas fa-fire"></i> Streak</span>
+                <span class="lb-today">Today</span>
+                {% if is_owner %}<span class="lb-action">Action</span>{% endif %}
+            </div>
+            {% for entry in leaderboard %}
+            <div class="lb-row {% if entry.username == session.username %}lb-current-user{% endif %}">
+                <span class="lb-rank">
+                    {% if loop.index == 1 %}
+                        <i class="fas fa-trophy gold"></i>
+                    {% elif loop.index == 2 %}
+                        <i class="fas fa-trophy silver"></i>
+                    {% elif loop.index == 3 %}
+                        <i class="fas fa-trophy bronze"></i>
+                    {% else %}
+                        {{ loop.index }}
+                    {% endif %}
+                </span>
+                <span class="lb-name">
+                    <i class="fas fa-user-circle"></i> {{ entry.username }}
+                </span>
+                <span class="lb-hours">
+                    <strong>{{ "%.1f"|format(entry.total_hours) }}</strong>h
+                </span>
+                <span class="lb-streak">
+                    {% if entry.streak > 0 %}
+                    <span class="streak-fire">{{ entry.streak }}<i class="fas fa-fire"></i></span>
+                    {% else %}
+                    -
+                    {% endif %}
+                </span>
+                <span class="lb-today">
+                    {% if entry.today_done %}
+                    <i class="fas fa-check-circle done-icon" title="{{ all_proofs.get(entry.user_id, '') }}"></i>
+                    {% else %}
+                    <i class="fas fa-times-circle miss-icon"></i>
+                    {% endif %}
+                </span>
+                {% if is_owner and entry.username != session.username %}
+                <span class="lb-action">
+                    <a href="{{ url_for('remove_participant', challenge_id=challenge._id, user_id=entry.user_id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Remove {{ entry.username }} from this challenge?')">
+                        <i class="fas fa-user-minus"></i> Remove
+                    </a>
+                </span>
+                {% elif is_owner and entry.username == session.username %}
+                <span class="lb-action"><span class="you-badge">You</span></span>
+                {% endif %}
+            </div>
+            {% if entry.today_done and all_images.get(entry.user_id) %}
+            <div class="lb-proof-row">
+                <span></span>
+                <div class="proof-content">
+                    {% if all_proofs.get(entry.user_id) %}
+                    <span class="proof-text"><i class="fas fa-quote-left"></i> {{ all_proofs[entry.user_id] }}</span>
+                    {% endif %}
+                    <span class="proof-image">
+                        <img src="{{ url_for('static', filename='uploads/' + all_images[entry.user_id]) }}" alt="Proof from {{ entry.username }}" onclick="this.classList.toggle('expanded')">
+                    </span>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No participants yet. Be the first to check in!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<script>
+function filterUsers(query) {
+    const rows = document.querySelectorAll('#inviteUserList .invite-user-row');
+    const q = query.toLowerCase().trim();
+    let count = 0;
+    rows.forEach(row => {
+        const uname = row.getAttribute('data-username') || '';
+        const match = !q || uname.includes(q);
+        row.style.display = match ? '' : 'none';
+        if (match) count++;
+    });
+    const empty = document.querySelector('#inviteUserList .empty-invite');
+    if (empty) empty.style.display = count === 0 ? '' : 'none';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard - Prodify{% endblock %}
+{% block content %}
+<div class="leaderboard-page">
+    <div class="leaderboard-header">
+        <i class="fas fa-trophy lb-main-icon"></i>
+        <h1>Global Leaderboard</h1>
+        <p>Top 50 most productive people on Prodify</p>
+    </div>
+
+    <div class="leaderboard-table lb-global">
+        <div class="lb-header">
+            <span class="lb-rank">#</span>
+            <span class="lb-name">User</span>
+            <span class="lb-points"><i class="fas fa-star"></i> Points</span>
+            <span class="lb-completed"><i class="fas fa-check-double"></i> Challenges</span>
+        </div>
+        {% for entry in leaderboard %}
+        <div class="lb-row {% if entry.username == session.username %}lb-current-user{% endif %}">
+            <span class="lb-rank">
+                {% if entry.rank == 1 %}
+                    <i class="fas fa-crown gold"></i>
+                {% elif entry.rank == 2 %}
+                    <i class="fas fa-trophy silver"></i>
+                {% elif entry.rank == 3 %}
+                    <i class="fas fa-trophy bronze"></i>
+                {% else %}
+                    {{ entry.rank }}
+                {% endif %}
+            </span>
+            <span class="lb-name">
+                <i class="fas fa-user-circle"></i> {{ entry.username }}
+                {% if entry.username == session.username %}
+                    <span class="you-badge">You</span>
+                {% endif %}
+            </span>
+            <span class="lb-points">
+                <span class="points-badge">{{ entry.points }}</span>
+            </span>
+            <span class="lb-completed">{{ entry.challenges_completed }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

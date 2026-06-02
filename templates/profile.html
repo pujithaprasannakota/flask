@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Profile - Prodify{% endblock %}
+{% block content %}
+<div class="profile-page">
+    <div class="profile-card">
+        <div class="profile-avatar">
+            <i class="fas fa-user-circle"></i>
+        </div>
+        <h1>{{ user.username }}</h1>
+        <p class="profile-email"><i class="fas fa-envelope"></i> {{ user.email }}</p>
+        <p class="profile-joined"><i class="fas fa-calendar-alt"></i> Joined {{ user.created_at.strftime('%B %Y') }}</p>
+
+        <div class="profile-stats-grid">
+            <div class="profile-stat">
+                <span class="profile-stat-value">{{ user.total_points or 0 }}</span>
+                <span class="profile-stat-label"><i class="fas fa-star"></i> Total Points</span>
+            </div>
+            <div class="profile-stat">
+                <span class="profile-stat-value">{{ total_checkins }}</span>
+                <span class="profile-stat-label"><i class="fas fa-check-circle"></i> Check-ins</span>
+            </div>
+            <div class="profile-stat">
+                <span class="profile-stat-value">{{ active_challenges }}</span>
+                <span class="profile-stat-label"><i class="fas fa-flag-checkered"></i> Active Challenges</span>
+            </div>
+            <div class="profile-stat">
+                <span class="profile-stat-value">{{ user.challenges_completed or 0 }}</span>
+                <span class="profile-stat-label"><i class="fas fa-trophy"></i> Completed</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

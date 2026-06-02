@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Prodify{% endblock %}
+{% block content %}
+<div class="dashboard">
+    <div class="welcome-section">
+        <div>
+            <h1>Hey, {{ user.username }}! <span class="wave">👋</span></h1>
+            <p class="welcome-sub">Ready to crush your goals today?</p>
+        </div>
+        <div class="user-stats">
+            <div class="stat-chip">
+                <i class="fas fa-star"></i>
+                <span>{{ user.total_points or 0 }} pts</span>
+            </div>
+            <div class="stat-chip">
+                <i class="fas fa-fire"></i>
+                <span>{{ user.challenges_completed or 0 }} done</span>
+            </div>
+        </div>
+    </div>
+
+    {% if open_challenges %}
+    <div class="section">
+        <div class="section-header">
+            <h2><i class="fas fa-compass"></i> Discover Challenges</h2>
+        </div>
+        <div class="challenge-carousel">
+            {% for c in open_challenges %}
+            <div class="challenge-card card-clickable" onclick="window.location.href='{{ url_for('challenge_detail', challenge_id=c._id) }}'">
+                <div class="challenge-card-header">
+                    <span class="category-badge">{{ c.category }}</span>
+                    <span class="participant-count"><i class="fas fa-users"></i> {{ c.participants_count or 0 }}</span>
+                </div>
+                <h3>{{ c.title }}</h3>
+                <p>{{ c.description[:80] }}{% if c.description|length > 80 %}...{% endif %}</p>
+                <div class="challenge-card-footer">
+                    <span><i class="fas fa-user"></i> {{ c.creator_name }}</span>
+                    <span><i class="fas fa-calendar"></i> {{ c.duration_days }}d</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <div class="section-header">
+            <h2><i class="fas fa-check-circle"></i> My Active Challenges</h2>
+            <a href="{{ url_for('create_challenge') }}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus"></i> Create
+            </a>
+        </div>
+
+        {% if my_challenges or joined_challenges %}
+        <div class="challenges-grid">
+            {% for c in my_challenges %}
+            <div class="challenge-card card-clickable" onclick="window.location.href='{{ url_for('challenge_detail', challenge_id=c._id) }}'">
+                <div class="challenge-card-header">
+                    <span class="category-badge">{{ c.category }}</span>
+                    <span class="owner-badge"><i class="fas fa-crown"></i> Owner</span>
+                </div>
+                <h3>{{ c.title }}</h3>
+                <p>{{ c.description[:60] }}{% if c.description|length > 60 %}...{% endif %}</p>
+                <div class="challenge-progress-mini">
+                    <div class="mini-stat">
+                        <i class="fas fa-users"></i> {{ c.participants_count or 0 }}
+                    </div>
+                    <div class="mini-stat">
+                        {% set today_key = c._id|string %}
+                        {% if progress_data.get(today_key) %}
+                            <span class="done-today"><i class="fas fa-check-circle"></i> Done</span>
+                        {% else %}
+                            <span class="pending-today"><i class="fas fa-clock"></i> Pending</span>
+                        {% endif %}
+                    </div>
+                    <div class="mini-stat">
+                        <i class="fas fa-hourglass-half"></i>
+                        {% set remaining = ((c.end_date - now()).days) if now is defined else c.duration_days %}
+                        {{ c.duration_days }}d
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% for c in joined_challenges %}
+            <div class="challenge-card card-clickable" onclick="window.location.href='{{ url_for('challenge_detail', challenge_id=c._id) }}'">
+                <div class="challenge-card-header">
+                    <span class="category-badge">{{ c.category }}</span>
+                    <span class="participant-badge"><i class="fas fa-user"></i> Participant</span>
+                </div>
+                <h3>{{ c.title }}</h3>
+                <p>{{ c.description[:60] }}{% if c.description|length > 60 %}...{% endif %}</p>
+                <div class="challenge-progress-mini">
+                    <div class="mini-stat">
+                        <i class="fas fa-user"></i> {{ c.creator_name }}
+                    </div>
+                    <div class="mini-stat">
+                        {% set today_key = c._id|string %}
+                        {% if progress_data.get(today_key) %}
+                            <span class="done-today"><i class="fas fa-check-circle"></i> Done</span>
+                        {% else %}
+                            <span class="pending-today"><i class="fas fa-clock"></i> Pending</span>
+                        {% endif %}
+                    </div>
+                    <div class="mini-stat">
+                        <i class="fas fa-hourglass-half"></i> {{ c.duration_days }}d
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-flag-checkered"></i>
+            <h3>No challenges yet</h3>
+            <p>Create your first challenge or join one to get started!</p>
+            <a href="{{ url_for('create_challenge') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Challenge
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

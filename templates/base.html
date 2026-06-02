@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Social Productivity Challenge{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-brand">
+                <i class="fas fa-rocket"></i> Prodify
+            </a>
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                {% if session.user_id %}
+                    <li><a href="{{ url_for('dashboard') }}"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                    <li><a href="{{ url_for('create_challenge') }}"><i class="fas fa-plus-circle"></i> New Challenge</a></li>
+                    <li><a href="{{ url_for('leaderboard') }}"><i class="fas fa-trophy"></i> Leaderboard</a></li>
+                    <li><a href="{{ url_for('profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+                    <li><a href="{{ url_for('logout') }}" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    <li><a href="{{ url_for('register') }}" class="btn-register"><i class="fas fa-user-plus"></i> Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for msg in messages %}
+                    {% if msg is sequence and msg is not string %}
+                        {% set cat = msg[0] %}
+                        {% set txt = msg[1] %}
+                    {% else %}
+                        {% set cat = 'info' %}
+                        {% set txt = msg %}
+                    {% endif %}
+                    <div class="flash-message flash-{{ cat }}">
+                        <span>{{ txt }}</span>
+                        <button class="flash-close" onclick="this.parentElement.remove()">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <p><i class="fas fa-rocket"></i> Prodify — Stay productive together</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('navToggle')?.addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+
+        setTimeout(function() {
+            document.querySelectorAll('.flash-message').forEach(function(el) {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(-10px)';
+                setTimeout(function() { el.remove(); }, 300);
+            });
+        }, 4000);
+    </script>
+</body>
+</html>
